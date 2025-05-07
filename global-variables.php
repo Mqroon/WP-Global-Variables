@@ -99,36 +99,37 @@ run_global_variables();
  *
  */ 
 
-function my_admin_menu() {
-    add_menu_page( 'Global Variables Settings Page', 'Global Variables', 'manage_options', 'example.php', 'myplguin_admin_page', 'dashicons-database', 6  );
-}
-
-function myplguin_admin_page(){
-    echo 'Welcome to admin page';
-
+function gv_admin_page(){
 	global $wpdb;
 	$table_name = $wpdb->prefix . "globalVariables"; 
 
 	$query = $wpdb->prepare("SELECT * FROM $table_name");
 	$results = $wpdb->get_results($query);
 
-	$variable_list = '<div id="global_variables_wrapper">';
+	$variable_list = '
+	<div id="gv_variables_wrapper">
+		<h2 class="gv_variables_h2">Saved Variables
+			<span id="loading_icon" class="dashicons dashicons-update" style="display: none;"></span> <!-- Spinning icon -->
+        	<span id="save_icon" class="dashicons dashicons-saved" style="display: block;"></span> <!-- Checkmark icon -->
+		</h2>
+		<div class="gv_variables_header">
+			<p>Identifier</p><p>Value</p>
+		</div>
+	';
 	
 	if (!empty($results)) {
 		foreach ($results as $row) {
 			$cleanedText = stripslashes($row->text);
 			$variable_list .= "
 				<div class=\"variable_item\">
-					<form class=\"form_custom_action_handler\" method=\"post\">
-						<label for=\"name\">Shortcode Identifier</label>
+					<form class=\"gv_custom_action_handler\" method=\"post\">
 						<input type=\"text\" name=\"name\" value=\"$row->name\">
-						<label for=\"custom_input\">Value</label>
 						<input type=\"text\" name=\"custom_input\" value=\"$cleanedText\"/>
 						<input type=\"text\" hidden name=\"id\" value=\"$row->id\">
 						<input type=\"text\" hidden name=\"action\" value=\"update_variable\">
 						<button type=\"submit\">Update</button>
 					</form>
-					<form class=\"form_custom_action_handler\" method=\"post\">
+					<form class=\"gv_custom_action_handler\" method=\"post\">
 						<input type=\"text\" hidden name=\"id\" value=\"$row->id\">
 						<input type=\"text\" hidden name=\"action\" value=\"delete_variable\">
 						<button type=\"submit\">Delete</button>
@@ -136,28 +137,66 @@ function myplguin_admin_page(){
 				</div>
 			";
 		}
+		$variable_list .= '</div>';
 	} else {
-		echo 'No variables found';
+		$variable_list .= '
+		<div class=\"variable_item\">
+			No variables found
+		<div>';
 	}
+	
+	echo '<div class="gv_admin_wrapper">';
+
+	echo '<h1>Global Variables Admin Page</h1>';
+	echo '<p>Welcome to the admin page!<br>Create some variables and reference them using [gv variable="identifier"] anywhere in your web page.</p>';
 
 	echo '
-	<form class="custom_action_handler" method="post">
-		<input type="text" name="name">
-		<input type="text" name="custom_input"/>
-		<input type="text" hidden name="action" value="add_new_variable">
-		<button type="submit">Create New Variable</button>
-	</form>
+	<div class="gv_form_wrapper">
+		<form class="gv_custom_action_handler" method="post">
+			<input type="text" name="name" placeholder="Identifier">
+			<input type="text" name="custom_input" placeholder="Value"/>
+			<input type="text" hidden name="action" value="add_new_variable">
+			<button type="submit">Create New Variable</button>
+		</form>
+	</div>
 	';
 
 	echo $variable_list;
 
 	echo '</div>';
 }
+function gv_admin_menu() {
+    add_menu_page( 'Global Variables Settings Page', 'Global Variables', 'manage_options', 'globalvariables.php', 'gv_admin_page', 'dashicons-database', 6  );
+}
 
-add_action('admin_menu', 'my_admin_menu');
+function gv_admin_enqueue_scripts() {
+	wp_dequeue_script('global-variables');
+    wp_deregister_script('global-variables');
+	
+	wp_dequeue_script('gv-form-script');
+    wp_deregister_script('gv-form-script');
+
+    wp_register_script('gv-form-script', plugins_url() . '/global-variables/admin/js/global-variables-admin.js', array('jquery'), false, true);
+    wp_enqueue_script('gv-form-script');
+	wp_localize_script('gv-form-script', 'my_ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
+	wp_enqueue_style('my-plugin-admin-style', plugins_url() . '/global-variables/admin/css/global-variables-admin.css');
+
+	wp_enqueue_style('dashicons');
+}
+add_action( 'admin_enqueue_scripts', 'gv_admin_enqueue_scripts' );
+
+add_action('admin_menu', 'gv_admin_menu');
 
 
-function gv_function ( $atts ) {
+add_action('admin_print_scripts', function () {
+    global $wp_scripts;
+    foreach ($wp_scripts->registered as $handle => $script) {
+        error_log("Enqueued script: " . $handle . " -> " . $script->src);
+    }
+});
+
+
+function gv_shortcode_handler ( $atts ) {
 	global $wpdb;
 	$table_name = $wpdb->prefix . "globalVariables"; 
 
@@ -175,10 +214,10 @@ function gv_function ( $atts ) {
 		return "Error: No variable found \"[{$a['variable']}]\"";
 	}
 }
-add_shortcode( 'gv', 'gv_function' );
+add_shortcode( 'gv', 'gv_shortcode_handler' );
 
 
-function globalVariables_dbtable_install() {
+function gv_dbtable_install() {
 	global $wpdb;
  
 	$table_name = $wpdb->prefix . "globalVariables"; 
@@ -195,14 +234,13 @@ function globalVariables_dbtable_install() {
 	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 	dbDelta( $sql );
 }
-
-function globalVariables_dbtable_install_data() {
+function gv_dbtable_install_data() {
 	global $wpdb;
  
 	$table_name = $wpdb->prefix . "globalVariables"; 
 
-	$welcome_name = 'Mr. WordPress';
-	$welcome_text = 'Congratulations, you just completed the installation!';
+	$welcome_name = 'Example Variable';
+	$welcome_text = 'Variable value 123';
 
 	$wpdb->insert( 
 		$table_name, 
@@ -212,19 +250,11 @@ function globalVariables_dbtable_install_data() {
 		) 
 	);
 }
-
-register_activation_hook( __FILE__, 'globalVariables_dbtable_install' );
-register_activation_hook( __FILE__, 'globalVariables_dbtable_install_data' );
-
-
-function global_variables_enqueue_scripts() {
-    wp_enqueue_script('form-script', plugins_url() . '/global-variables/public/js/form.js', array('jquery'), '1.0', true);
-	wp_localize_script('form-script', 'my_ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
-}
-add_action( 'admin_enqueue_scripts', 'global_variables_enqueue_scripts' );
+register_activation_hook( __FILE__, 'gv_dbtable_install' );
+register_activation_hook( __FILE__, 'gv_dbtable_install_data' );
 
 
-function add_new_variable() {
+function gv_add_new_variable() {
 	if (!current_user_can('administrator')) {
 		wp_die('You do not have permission to access this action');
 		return;
@@ -252,7 +282,7 @@ function add_new_variable() {
 	wp_die();
 }
 
-function delete_variable() {
+function gv_delete_variable() {
 	if (!current_user_can('administrator')) {
 		wp_die('You do not have permission to access this action');
 		return;
@@ -275,7 +305,7 @@ function delete_variable() {
 	wp_die();
 }
 
-function update_variable() {
+function gv_update_variable() {
 	if (!current_user_can('administrator')) {
 		wp_die('You do not have permission to access this action');
 		return;
@@ -301,7 +331,7 @@ function update_variable() {
 	wp_die();
 }
 
-function refresh_variable_data() {
+function gv_refresh_variable_data() {
 	if (!current_user_can('administrator')) {
 		wp_die('You do not have permission to access this action');
 		return;
@@ -312,24 +342,30 @@ function refresh_variable_data() {
 
 	$query = $wpdb->prepare("SELECT * FROM $table_name");
 	$results = $wpdb->get_results($query);
-
-	$variable_list = '<div id="global_variables_wrapper">';
+	
+	$variable_list = '
+		<h2 class="gv_variables_h2">Saved Variables
+			<span id="loading_icon" class="dashicons dashicons-update" style="display: none;"></span> <!-- Spinning icon -->
+        	<span id="save_icon" class="dashicons dashicons-saved" style="display: block;"></span> <!-- Checkmark icon -->
+		</h2>
+		<div class="gv_variables_header">
+			<p>Identifier</p><p>Value</p>
+		</div>
+	';
 	
 	if (!empty($results)) {
 		foreach ($results as $row) {
 			$cleanedText = stripslashes($row->text);
 			$variable_list .= "
 				<div class=\"variable_item\">
-					<form class=\"form_custom_action_handler\" method=\"post\">
-						<label for=\"name\">Shortcode Identifier</label>
+					<form class=\"gv_custom_action_handler\" method=\"post\">
 						<input type=\"text\" name=\"name\" value=\"$row->name\">
-						<label for=\"custom_input\">Value</label>
 						<input type=\"text\" name=\"custom_input\" value=\"$cleanedText\"/>
 						<input type=\"text\" hidden name=\"id\" value=\"$row->id\">
 						<input type=\"text\" hidden name=\"action\" value=\"update_variable\">
 						<button type=\"submit\">Update</button>
 					</form>
-					<form class=\"form_custom_action_handler\" method=\"post\">
+					<form class=\"gv_custom_action_handler\" method=\"post\">
 						<input type=\"text\" hidden name=\"id\" value=\"$row->id\">
 						<input type=\"text\" hidden name=\"action\" value=\"delete_variable\">
 						<button type=\"submit\">Delete</button>
@@ -346,10 +382,8 @@ function refresh_variable_data() {
 	wp_die();
 }
 
-add_action('wp_ajax_add_new_variable', 'add_new_variable');
-add_action('wp_ajax_delete_variable', 'delete_variable');
-add_action('wp_ajax_update_variable', 'update_variable');
-add_action('wp_ajax_refresh_variable_data', 'refresh_variable_data');
-
-
+add_action('wp_ajax_add_new_variable', 'gv_add_new_variable');
+add_action('wp_ajax_delete_variable', 'gv_delete_variable');
+add_action('wp_ajax_update_variable', 'gv_update_variable');
+add_action('wp_ajax_refresh_variable_data', 'gv_refresh_variable_data');
 ?>

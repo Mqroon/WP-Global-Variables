@@ -1,4 +1,73 @@
-/**
- * All of the CSS for your admin-specific functionality should be
- * included in this file.
- */
+.gv_admin_wrapper {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.gv_form_wrapper {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+
+#gv_variables_wrapper {
+    background-color: #e0e0e0;
+    border-radius: 20px;
+    padding: 10px;
+    padding-bottom: 3em;
+    width: 95%;
+    margin: 0 auto;
+}
+#gv_variables_wrapper .gv_variables_h2 {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin: 0 auto;
+    margin-top: 20px;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px #333 solid;
+}
+#gv_variables_wrapper .gv_variables_header {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    width: max-content;
+    text-align: center;
+}
+#gv_variables_wrapper p { width: 15em; font-weight: bold; }
+
+.variable_item {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+.variable_item input { width: 15em; }
+
+
+.gv_custom_action_handler {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.gv_custom_action_handler input[type="text"] {
+    border: 1px black solid;
+    border-radius: 3px;
+    margin: 2px;
+}
+
+.gv_custom_action_handler button {
+    border: none;
+    outline: none;
+    padding: 5px;
+    background-color: #2271b1;
+    color: #fff;
+    border-radius: 3px;
+    margin: 2px;
+}
+.gv_custom_action_handler button:focus { background-color: #135e96; outline: 1px #0f4874 solid; }
+.gv_custom_action_handler button:active { border: 1px #0f4874 solid; }
