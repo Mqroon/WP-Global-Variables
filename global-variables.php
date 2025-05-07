@@ -19,6 +19,7 @@
  * Version:           1.0.0
  * Author:            Walker Alexander
  * Author URI:        https://github.com/Mqroon/
+ * GitHub Plugin URI: https://github.com/Mqroon/WP-Global-Variables.git
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       global-variables
