@@ -160,7 +160,6 @@ class Global_Variables {
 
 		add_filter('plugins_api', 'github_plugin_info', 20, 3);
 		add_filter('site_transient_update_plugins', 'check_github_update');
-		add_action('admin_init', 'gv_after_update_cleanup');
 
 		add_action('wp_ajax_add_new_variable', 'gv_add_new_variable');
 		add_action('wp_ajax_delete_variable', 'gv_delete_variable');
@@ -183,10 +182,6 @@ class Global_Variables {
 		}
 
 
-		function gv_after_update_cleanup() {
-			delete_site_transient('update_plugins');
-			wp_cache_flush();
-		}
 		function check_github_update($transient) {
 			if (!$transient || !is_object($transient)) {
 				$transient = new stdClass(); // Ensure `$transient` is an object
@@ -203,8 +198,12 @@ class Global_Variables {
 			if ($cached_data === "APICALLRATES") {
 				return $transient;
 			} else if ($cached_data !== false) {
-				$transient->response[$plugin_file] = $cached_data;
-				return $transient; // Use cached response if available
+				if (version_compare($current_version, $cached_data->version, '<')) {
+					$transient->response[$plugin_file] = $cached_data;
+					return $transient; // Use cached response if available
+				}
+				delete_site_transient($cache_key);
+				return $transient;
 			}
 		
 			$github_api_url = "https://api.github.com/repos/Mqroon/WP-Global-Variables/releases/latest";
