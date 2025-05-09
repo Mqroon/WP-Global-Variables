@@ -216,11 +216,24 @@ class Global_Variables {
 			$new_version = ltrim($body["tag_name"], "v");
 		
 			if (version_compare($current_version, $new_version, '<')) {
+				$zip_url = false;
+				foreach ($body['assets'] as $asset) {
+					if (strpos($asset['name'], 'global-variables.zip') !== false) {
+						$zip_url = $asset['browser_download_url'];
+						break;
+					}
+				}
+				if (!$zip_url) {
+					set_transient($cache_key, "APICALLRATES", 100);
+					return $transient;
+				}
+				error_log($zip_url);
+
 				$update_data = (object) [
 					'slug' => $plugin_slug,
 					'plugin' => "/$plugin_slug/$plugin_slug.php",
 					'new_version' => $new_version,
-					'package' => $body["zipball_url"],
+					'package' => $zip_url,
 					'url' => 'https://github.com/Mqroon/WP-Global-Variables',
 					'name' => 'Global Variables',
 					'version' => $new_version,

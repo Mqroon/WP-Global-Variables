@@ -4,7 +4,7 @@
  * Plugin Name:       Global Variables
  * Plugin URI:        https://github.com/Mqroon/WP-Global-Variables
  * Description:       Enables global variables accessible via shortcodes.
- * Version:           0.0.1
+ * Version:           0.0.0.1
  * Author:            Walker Alexander
  * Author URI:        https://github.com/Mqroon/
  * GitHub Plugin URI: https://github.com/Mqroon/WP-Global-Variables
