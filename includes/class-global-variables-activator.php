@@ -30,8 +30,6 @@ class Global_Variables_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-		$cache_key = 'gv_github_plugin_update_data';
-		delete_site_transient($cache_key); // Delete update cache so it doesn't show an update that isn't there after updating.
 
 		global $wpdb;
 		

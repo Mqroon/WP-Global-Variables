@@ -160,12 +160,12 @@ class Global_Variables {
 
 		add_filter('plugins_api', 'github_plugin_info', 20, 3);
 		add_filter('site_transient_update_plugins', 'check_github_update');
+		add_action('admin_init', 'gv_after_update_cleanup');
 
 		add_action('wp_ajax_add_new_variable', 'gv_add_new_variable');
 		add_action('wp_ajax_delete_variable', 'gv_delete_variable');
 		add_action('wp_ajax_update_variable', 'gv_update_variable');
 		add_action('wp_ajax_refresh_variable_data', 'gv_refresh_variable_data');
-
 
 		function gv_admin_page(){
 			global $wpdb;
@@ -183,6 +183,10 @@ class Global_Variables {
 		}
 
 
+		function gv_after_update_cleanup() {
+			delete_site_transient('update_plugins');
+			wp_cache_flush();
+		}
 		function check_github_update($transient) {
 			if (!$transient || !is_object($transient)) {
 				$transient = new stdClass(); // Ensure `$transient` is an object
