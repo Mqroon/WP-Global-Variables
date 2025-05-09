@@ -4,7 +4,7 @@
  * Plugin Name:       Global Variables
  * Plugin URI:        https://github.com/Mqroon/WP-Global-Variables
  * Description:       Enables global variables accessible via shortcodes.
- * Version:           0.1.1
+ * Version:           0.0.1
  * Author:            Walker Alexander
  * Author URI:        https://github.com/Mqroon/
  * GitHub Plugin URI: https://github.com/Mqroon/WP-Global-Variables
@@ -24,7 +24,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'GLOBAL_VARIABLES_VERSION', '1.0.0' );
+define( 'GLOBAL_VARIABLES_VERSION', '0.0.1' );
 
 /**
  * The code that runs during plugin activation.

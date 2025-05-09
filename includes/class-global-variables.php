@@ -213,8 +213,7 @@ class Global_Variables {
 				return $transient;
 			}
 		
-			$current_version = preg_replace('/^0+/', '', $current_version);
-			$new_version = preg_replace('/^0+/', '', ltrim($body["tag_name"], "v"));
+			$new_version = ltrim($body["tag_name"], "v");
 		
 			if (version_compare($current_version, $new_version, '<')) {
 				$update_data = (object) [
@@ -230,6 +229,9 @@ class Global_Variables {
 					'author' => 'Walker Alexander',
 					'homepage' => 'https://github.com/Mqroon/WP-Global-Variables',
 				];
+			} else {
+				set_transient($cache_key, "APICALLRATES", 100);
+				return $transient;
 			}
 			$transient->response[$plugin_file] = $update_data;
 			// Cache the update response for 12 hours (43200 seconds)
@@ -270,7 +272,7 @@ class Global_Variables {
 							  A: Use the shortcode `[gv name="example"]`.<br>
 							  Q: How do I create a variable?<br>
 							  A: Visit the admin page and create a variable with a name and value.',
-					'changelog' => 'Version 1.0.0 - Initial release with basic functionality.',
+					'changelog' => $body["body"],
 				]		
 			];
 		
