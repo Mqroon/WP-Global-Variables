@@ -184,8 +184,6 @@ class Global_Variables {
 
 
 		function check_github_update($transient) {
-			$transient = get_site_transient('update_plugins');
-
 			if (!$transient || !is_object($transient)) {
 				$transient = new stdClass(); // Ensure `$transient` is an object
 			}
@@ -220,7 +218,7 @@ class Global_Variables {
 			}
 		
 			$new_version = ltrim($body["tag_name"], "v");
-		
+
 			if (version_compare($current_version, $new_version, '<')) {
 				$zip_url = false;
 				foreach ($body['assets'] as $asset) {
