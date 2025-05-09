@@ -72,6 +72,7 @@ class Global_Variables_Admin {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
+		wp_enqueue_style('dashicons');
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/global-variables-admin.css', array(), $this->version, 'all' );
 
@@ -95,9 +96,12 @@ class Global_Variables_Admin {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
-
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/global-variables-admin.js', array( 'jquery' ), $this->version, false );
-
+		wp_dequeue_script('gv-form-script');
+		wp_deregister_script('gv-form-script');
+	
+		wp_register_script('gv-form-script', plugins_url() . '/global-variables/admin/js/global-variables-admin.js', array('jquery'), $this->version, true);
+		wp_enqueue_script('gv-form-script');
+		wp_localize_script('gv-form-script', 'my_ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
 	}
 
 }
