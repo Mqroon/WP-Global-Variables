@@ -184,6 +184,12 @@ class Global_Variables {
 
 
 		function check_github_update($transient) {
+			$transient = get_site_transient('update_plugins');
+
+			if (!$transient || !is_object($transient)) {
+				$transient = new stdClass(); // Ensure `$transient` is an object
+			}
+
 			$cache_key = 'gv_github_plugin_update_data';
 			$cached_data = get_transient($cache_key);
 		
